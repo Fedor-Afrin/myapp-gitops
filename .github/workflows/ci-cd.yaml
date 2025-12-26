@@ -35,8 +35,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.short_sha }}
-            ghcr.io/${{ github.repository }}:latest
+            ${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.short_sha }}
+            ${{ steps.vars.outputs.image_repo }}:latest
 
       - name: Update Helm values (image repo + tag)
         shell: bash
