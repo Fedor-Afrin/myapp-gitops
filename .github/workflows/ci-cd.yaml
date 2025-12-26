@@ -44,22 +44,9 @@ jobs:
         env:
           IMAGE_REPO: ${{ steps.vars.outputs.image_repo }}
           IMAGE_TAG: ${{ steps.vars.outputs.short_sha }}
+          
         run: |
-          python3 - <<'PY'
-import re, pathlib, os
-p = pathlib.Path("charts/myapp/values.yaml")
-s = p.read_text(encoding="utf-8")
-repo = os.environ["IMAGE_REPO"]
-tag  = os.environ["IMAGE_TAG"]
-
-s = re.sub(r'(?m)^(\s*repository:\s*).*$',
-           r'\1' + repo, s)
-s = re.sub(r'(?m)^(\s*tag:\s*).*$',
-           r'\1"' + tag + r'"', s)
-
-p.write_text(s, encoding="utf-8")
-print("Updated values.yaml to", repo, tag)
-PY
+          python3 -c 'import re, pathlib, os; p=pathlib.Path("charts/myapp/values.yaml"); s=p.read_text(encoding="utf-8"); repo=os.environ["IMAGE_REPO"]; tag=os.environ["IMAGE_TAG"]; s=re.sub(r"(?m)^(\\s*repository:\\s*).*$", r"\\1"+repo, s); s=re.sub(r"(?m)^(\\s*tag:\\s*).*$", r"\\1\\""+tag+"\\"", s); p.write_text(s, encoding="utf-8"); print("Updated values.yaml to", repo, tag)'
 
       - name: Commit changes
         shell: bash
