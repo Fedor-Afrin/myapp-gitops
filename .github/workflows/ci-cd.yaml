@@ -1,0 +1,73 @@
+name: CI-CD (Build to GHCR + GitOps bump Helm values)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build_push_and_bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "sha=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "image_repo=ghcr.io/${GITHUB_REPOSITORY}" >> $GITHUB_OUTPUT
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.short_sha }}
+            ghcr.io/${{ github.repository }}:latest
+
+      - name: Update Helm values (image repo + tag)
+        run: |
+          set -e
+          python - <<'PY'
+import re, pathlib, os
+
+p = pathlib.Path("charts/myapp/values.yaml")
+s = p.read_text()
+
+repo = os.environ["IMAGE_REPO"]
+tag  = os.environ["IMAGE_TAG"]
+
+s = re.sub(r'(?m)^(\\s*repository:\\s*).*$',
+           r'\\1' + repo, s)
+s = re.sub(r'(?m)^(\\s*tag:\\s*).*$',
+           r'\\1"' + tag + r'"', s)
+
+p.write_text(s)
+print("Updated values.yaml to", repo, tag)
+PY
+        env:
+          IMAGE_REPO: ${{ steps.vars.outputs.image_repo }}
+          IMAGE_TAG: ${{ steps.vars.outputs.short_sha }}
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add charts/myapp/values.yaml
+          git commit -m "chore(gitops): bump image tag to ${{ steps.vars.outputs.short_sha }}" || exit 0
+          git push
