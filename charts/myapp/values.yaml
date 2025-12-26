@@ -1,6 +1,6 @@
 image:
-  repository: ghcr.io/OWNER/REPO
-  tag: "dev"
+  repository: ghcr.io/fedor-afrin/myapp-gitops
+  tag: "f01802b"
   pullPolicy: IfNotPresent
 
 service:
