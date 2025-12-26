@@ -1,12 +1,10 @@
-replicaCount: 2
-
 image:
-  # GitHub Actions will replace this with: ghcr.io/<owner>/<repo>
-  repository: ghcr.io/fedor-afrin/myapp-gitops
-  tag: "eb3bb06"
+  repository: ghcr.io/OWNER/REPO
+  tag: "dev"
   pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
   targetPort: 8080
+  nodePort: 30088
