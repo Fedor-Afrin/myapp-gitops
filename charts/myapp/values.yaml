@@ -2,8 +2,8 @@ replicaCount: 2
 
 image:
   # GitHub Actions will replace this with: ghcr.io/<owner>/<repo>
-  repository: ghcr.io/OWNER/REPO
-  tag: "dev"
+  repository: ghcr.io/fedor-afrin/myapp-gitops
+  tag: "aa6cf92"
   pullPolicy: IfNotPresent
 
 service:
