@@ -1,4 +1,4 @@
-replicaCount: 4
+replicaCount: 10
 image:
   repository: ghcr.io/fedor-afrin/myapp-gitops
   tag: "bb265fe"
