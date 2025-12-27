@@ -1,7 +1,7 @@
 replicaCount: 10
 image:
   repository: ghcr.io/fedor-afrin/myapp-gitops
-  tag: "bb265fe"
+  tag: "aa74007"
   pullPolicy: IfNotPresent
 
 service:
